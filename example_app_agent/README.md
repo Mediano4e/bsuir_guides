@@ -240,7 +240,7 @@ while (it3_2->Next())
 
 ```c++
 ScAddr actionNode = otherNode;
-ScAddr myInputNode = IteratorUtils::getAnyFromSet(ms_context.get(), actionNode); 
+ScAddr inputStruct = IteratorUtils::getAnyFromSet(ms_context.get(), actionNode); 
 
 ScIterator5Ptr it5 = m_memoryCtx.Iterator5(
         myCurrentNode,                        
