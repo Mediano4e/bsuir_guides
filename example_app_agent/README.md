@@ -43,16 +43,16 @@ Sc-обьектами считаются узлы(вершины) и дуги(р
 
 Теперь нам нужно получить переданные узлы в самом агенте. Для этого нам надо обратиться непосредственно к otherNode.
 
-```
+```c++
 ScAddr actionNode = otherNode; 
 ```
 Если у нас передан один аргумент, то можем его получить через команду(фактически, забегая наперёд, getAnyFromSet использует простейший итератор-тройку):
-```
+```c++
 ScAddr myInputObject = IteratorUtils::getAnyFromSet(ms_context.get(), actionNode); 
 ```
 
 Если же у нас больше одного аргумента, то используем для этого цикл и вектор аргументов:
-```
+```c++
 ScAddrVector myInputObjects;
 int i = 0, n = 2;
 while (i < n)
@@ -66,13 +66,13 @@ while (i < n)
 ## Реализация алгоритма
 
 Если вы будете писать в обычных редакторах кода типо VS или обычного блокнота, то для отладки советую использовать для вывода в консоль:
-```
+```c++
 SC_LOG_ERROR("something to show in console");
 ```
 
 Если хотите получить системный идентификатор строкой, то можно использовать(в данном случае название выведется в консоль):
 
-```
+```c++
 SC_LOG_ERROR( m_memoryCtx.HelperGetSystemIdtf(yourVertex) );
 ```
 
@@ -90,7 +90,7 @@ SC_LOG_ERROR( m_memoryCtx.HelperGetSystemIdtf(yourVertex) );
 
 То есть вот синтаксис:
 
-```
+```c++
 ScAddr actioNode = otherNode;
 ScIterator3Ptr it3 = m_memoryCtx.Iterator3(
             actionNode,               // ->Get(0)
@@ -105,7 +105,7 @@ ScIterator3Ptr it3 = m_memoryCtx.Iterator3(
 
 Каждому неизвестному можно задать тип(задать объект неявно), чтобы получить именно то, что нам нужно. Вот пример, который пройдется по всем конструкциям включающим actionNode родительским узлом, некоторую связь и некоторый константный узел:  
 
-```
+```c++
 ScAddr actioNode = otherNode;
 ScIterator3Ptr it3 = m_memoryCtx.Iterator3(
             actionNode,               // ->Get(0)
