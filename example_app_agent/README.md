@@ -108,6 +108,12 @@ SC_LOG_ERROR( m_memoryCtx.HelperGetSystemIdtf(yourVertex) );
 
 ### <a id="iterators">Итераторы3 и Итераторы5</a>
 
+<p align="center">
+
+  <img width="411" height="135" src="https://ostis-dev.github.io/sc-machine/cpp/images/iterators_scheme.png">
+
+</p>
+
 ![iterators](https://ostis-dev.github.io/sc-machine/cpp/images/iterators_scheme.png)
 
 Итераторы являются универсальным инструментом для перехода от вершины к вершине и для прочих манипуляций с графовыми структурами. Итераторы соответствуют маленьким шаблонам(см Лаб 4 по МОИСу) на 2 вершины и одну связь без узла отношений, либо с ним и соответствущим ему ребром.
