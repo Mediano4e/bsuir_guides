@@ -108,7 +108,7 @@ SC_LOG_ERROR( m_memoryCtx.HelperGetSystemIdtf(yourVertex) );
 
 ### <a id="iterators">Итераторы3 и Итераторы5</a>
 
-<p align="center">
+<p align="left">
 
   <img width="411" height="135" src="https://ostis-dev.github.io/sc-machine/cpp/images/iterators_scheme.png">
 
