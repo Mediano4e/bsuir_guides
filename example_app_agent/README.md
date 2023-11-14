@@ -92,34 +92,63 @@ SC_LOG_ERROR( m_memoryCtx.HelperGetSystemIdtf(yourVertex) );
 
 ```c++
 ScAddr actioNode = otherNode;
+ScAddr myInputNode = IteratorUtils::getAnyFromSet(ms_context.get(), actionNode); 
+
 ScIterator3Ptr it3 = m_memoryCtx.Iterator3(
-            actionNode,               // ->Get(0)
+            myInputObject,               // ->Get(0)
             ScType::Unknown,          // ->Get(1)
             ScType::Unknown);         // ->Get(2)
-    while (it3->Next())
-    {
-        SC_LOG_ERROR( m_memoryCtx.HelperGetSystemIdtf( it3->Get(2) ) );
-    }
-```
-В примере выше мы вернём все связи, в которых actionNode является РОДИТЕЛЬСКИМ узлом, и соответствующие им объекты(это могут быть и узлы и связи). Через цикл while будут перебираться результаты поиска. Можно поставить actionNode на позицию узла НАСЛЕДНИКА(позиция 2), и тогда результаты будут другими. Направление рёбер(стрелок) от узла родителя к узлу наследнику.
 
-Каждому неизвестному можно задать тип(задать объект неявно), чтобы получить именно то, что нам нужно. Вот пример, который пройдется по всем конструкциям включающим actionNode родительским узлом, некоторую связь и некоторый константный узел:  
+while (it3->Next())
+{
+    SC_LOG_ERROR( m_memoryCtx.HelperGetSystemIdtf( it3->Get(2) ) );
+}
+```
+В примере выше мы вернём все связи, в которых myInputNode является РОДИТЕЛЬСКИМ узлом, и соответствующие им объекты(это могут быть и узлы и связи). Через цикл while будут перебираться результаты поиска. Можно поставить myInputNode на позицию узла НАСЛЕДНИКА(позиция 2), и тогда результаты будут другими. Направление рёбер(стрелок) от узла родителя к узлу наследнику.
+
+Каждому неизвестному можно задать тип(задать объект неявно), чтобы получить именно то, что нам нужно. Вот пример, который пройдется по всем конструкциям включающим myInputNode родительским узлом, некоторую связь и некоторый константный узел:  
 
 ```c++
 ScAddr actioNode = otherNode;
+ScAddr myInputObject = IteratorUtils::getAnyFromSet(ms_context.get(), actionNode); 
+
 ScIterator3Ptr it3 = m_memoryCtx.Iterator3(
             actionNode,               // ->Get(0)
             ScType::Unknown,          // ->Get(1)
-            ScType::NodeConst);         // ->Get(2)
-    while (it3->Next())
-    {
-        SC_LOG_ERROR( m_memoryCtx.HelperGetSystemIdtf( it3->Get(2) ) );
-    }
+            ScType::NodeConst);       // ->Get(2)
+    
+while (it3->Next())
+{
+    SC_LOG_ERROR( m_memoryCtx.HelperGetSystemIdtf( it3->Get(2) ) );
+}
 ```
 
 #### Итератор5
 
+По своей сути Итератор5 отличается от Итератора3 только тем, что ищет конструкции, у которых есть узел отношений(впринципе это может быть любой узел соответствующий данному шаблону).
 
+Пример синтаксиса:
+```c++
+ScAddr actionNode = otherNode;
+ScAddr myInputNode = IteratorUtils::getAnyFromSet(ms_context.get(), actionNode); 
+
+ScIterator5Ptr it5 = m_memoryCtx.Iterator5(
+        myInputNode,                        // ->Get(0)
+        ScType::Unknown,                    // ->Get(1)
+        ScType::NodeConst,                  // ->Get(2)
+        ScType::EdgeAccessConstPosPerm,     // ->Get(3)
+        ScType::NodeConst);                 // ->Get(4)
+
+while (it5->Next())
+{
+    SC_LOG_ERROR( m_memoryCtx.HelperGetSystemIdtf( it5->Get(2) ) );
+    SC_LOG_ERROR( m_memoryCtx.HelperGetSystemIdtf( it5->Get(4) ) );
+}
+```
+
+Т.к. это работает так же как и шаблоны, Итератор3 найдет конструкции и на пять элементов, но полностью проигнорирует наличие аргументов 3 и 4. А вот Итератор5 конструкции без узла отношений обходить не будет.
+
+Все типы объектов можно найти [тут]().
 
 ## Формирование выходных данных и вывод результата
 
