@@ -317,7 +317,7 @@ ScIterator5Ptr it5 = m_memoryCtx.Iterator5(
         ScType::Unknown,                    
         ScType::NodeConst,                  
         ScType::EdgeAccessConstPosPerm,     
-        inpurStruct);                 
+        inputStruct);                 
 
 while (it5->Next())
 {
