@@ -326,4 +326,4 @@ while (it5->Next())
 ```
 [К предисловию](#same_node)
 
-[Примеры выполнения агентов]()
+[Примеры выполнения агентов](https://github.com/Mediano4e/bsuir_guides/tree/main/example_app_agent/examples)
