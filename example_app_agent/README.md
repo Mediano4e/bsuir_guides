@@ -75,7 +75,7 @@ Sc-обьектами считаются узлы(вершины) и дуги(р
 
 ## <a id="input">Получение входных данных агентом</a>
 
-Начнем с передачи обекта(ов) в агента. Как я упоминал ранее, весь интерфейс веба является некоторым графом. Когда мы нажимаем пкм по узлу и нажимаем "закрепить"(булавка) мы создаем ребро от узла, который участвует в работе агента, под названием otherNode к выбранному обьекту. Чтобы после этого вызвать нашего агента, мы нажимаем на кнопку нашего агента, после чего проверяется достаточно ли у otherNode исходящих рёбер. Если их достаточно, проводится ребро от listenNode нашего агента к otherNode. При регистрации мы писали, что наш агент будет реагировать на событие "Появление ребра". Вот это оно самое. После этого запускается наш агент.
+Начнем с передачи обекта(ов) в агента. Как я упоминал ранее, весь интерфейс веба является некоторым графом. Когда мы нажимаем пкм по узлу и нажимаем "закрепить"(булавка) мы создаем ребро от узла, который участвует в работе агента, под названием otherAddr к выбранному обьекту. Чтобы после этого вызвать нашего агента, мы нажимаем на кнопку нашего агента, после чего проверяется достаточно ли у otherAddr исходящих рёбер. Если их достаточно, проводится ребро от listenAddr нашего агента к otherAddr. При регистрации мы писали, что наш агент будет реагировать на событие "Появление ребра". Вот это оно самое. После этого запускается наш агент.
 
 
 <p align="center">
@@ -84,10 +84,10 @@ Sc-обьектами считаются узлы(вершины) и дуги(р
 
 </p>
 
-Теперь нам нужно получить переданные узлы в самом агенте. Для этого нам надо обратиться непосредственно к otherNode.
+Теперь нам нужно получить переданные узлы в самом агенте. Для этого нам надо обратиться непосредственно к otherAddr.
 
 ```c++
-ScAddr actionNode = otherNode; 
+ScAddr actionNode = otherAddr; 
 ```
 Если у нас передан один аргумент, то можем его получить через команду(фактически, забегая наперёд, getAnyFromSet использует простейший итератор-тройку):
 ```c++
@@ -147,7 +147,7 @@ __Главным инструментом для реализации алгор
 То есть вот синтаксис:
 
 ```c++
-ScAddr actioNode = otherNode;
+ScAddr actioNode = otherAddr;
 ScAddr myInputNode = IteratorUtils::getAnyFromSet(ms_context.get(), actionNode); 
 
 ScIterator3Ptr it3 = m_memoryCtx.Iterator3(
@@ -165,7 +165,7 @@ while (it3->Next())
 Каждому неизвестному можно задать тип(задать объект неявно), чтобы получить именно то, что нам нужно. Вот пример, который пройдется по всем конструкциям включающим myInputNode родительским узлом, некоторую связь и некоторый константный узел:  
 
 ```c++
-ScAddr actioNode = otherNode;
+ScAddr actioNode = otherAddr;
 ScAddr myInputObject = IteratorUtils::getAnyFromSet(ms_context.get(), actionNode); 
 
 ScIterator3Ptr it3 = m_memoryCtx.Iterator3(
@@ -187,7 +187,7 @@ while (it3->Next())
 
 Пример синтаксиса:
 ```c++
-ScAddr actionNode = otherNode;
+ScAddr actionNode = otherAddr;
 ScAddr myInputNode = IteratorUtils::getAnyFromSet(ms_context.get(), actionNode); 
 
 ScIterator5Ptr it5 = m_memoryCtx.Iterator5(
@@ -217,14 +217,14 @@ while (it5->Next())
 Если наш агент столкнулся с ошибкой или по какой-либо причине не смог правильно отработать, то нам нужно завершить его с флагом false и передать ему узел с вводными данными, чтобы он отчистил его:
 
 ```c++
-ScAddr actionNode = otherNode;
+ScAddr actionNode = otherAddr;
 utils::AgentUtils::finishAgentWork(&m_memoryCtx, actionNode, false);
 ```
 
 Если наш агентом всё успешно выполнил, то мы завершаем его с флагом true и передаём ему помимо узла с аргументами вектор всех Sc-объектов, которые мы хотим вывести помимо самих аргументов в качестве результата:
 
 ```c++
-ScAddr actionNode = otherNode;
+ScAddr actionNode = otherAddr;
 ScAddrVector answerElements;
 utils::AgentUtils::finishAgentWork(&m_memoryCtx, actionNode, answerElements, true);
 ```
@@ -309,7 +309,7 @@ while (it3_2->Next())
 2. При обходе графа использовать итераторы5(пусть inputStruct - название нашего контура):
 
 ```c++
-ScAddr actionNode = otherNode;
+ScAddr actionNode = otherAddr;
 ScAddr inputStruct = IteratorUtils::getAnyFromSet(ms_context.get(), actionNode); 
 
 ScIterator5Ptr it5 = m_memoryCtx.Iterator5(
@@ -325,3 +325,5 @@ while (it5->Next())
 }
 ```
 [К предисловию](#same_node)
+
+[Примеры выполнения агентов]()
