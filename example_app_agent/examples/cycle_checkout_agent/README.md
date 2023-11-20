@@ -211,7 +211,7 @@ bool CycleCheckAgent::cycleCheckout(VisitedNodeVector & nodes, ScAddrVector & no
 
 Также нам нужно предусмотреть случай, когда наш граф несвязный. Как вариант, можно просто пройтись циклом по вектору наших структур после вызова дфса для одного узла и проверить их текущее состояние. Если узел остался непосещённым, то вызовем проверку для него отдельно и так далее:
 
-```с++
+```c++
 bool CycleCheckAgent::getCheckoutResult(const ScAddr & inputGraph) {
     SC_LOG_ERROR("Checkout starts");
     VisitedNodeVector graphNodes;
