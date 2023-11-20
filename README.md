@@ -1,4 +1,5 @@
-# bsuir_guides
-some guides for your studies
+# Гайды по учёбе и не только(возможно)
+## Готовые гайды:
 
-also chech in_dev branch
+## В разработке:
+Гайд на создание агентов в рамках example-app(0.8.0)
