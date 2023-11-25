@@ -237,7 +237,7 @@ while (it5->Next())
   </tr>
 
   <tr>
-    <td><img src="../../images/scg/scg_node_var.png"></img></td>
+    <td><img src="https://ostis-dev.github.io/sc-machine/images/scg/scg_node_var.png"></img></td>
     <td>sc_type_node | sc_type_var</td>
     <td>ScType::NodeVar</td>
   </tr>
@@ -261,7 +261,7 @@ while (it5->Next())
   </tr>
 
   <tr>
-    <td><img src="../https://ostis-dev.github.io/sc-machine/images/scg/scg_node_var_struct.png"></img></td>
+    <td><img src="https://ostis-dev.github.io/sc-machine/images/scg/scg_node_var_struct.png"></img></td>
     <td>sc_type_node | sc_type_var | sc_type_node_struct</td>
     <td>ScType::NodeVarStruct</td>
   </tr>
