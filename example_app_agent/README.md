@@ -632,7 +632,7 @@ templ.Triple(
 
 ScTemplateSearchResult searchResult;
 
-ms_context->HelperSearchTemplate(templ, muStruct, searchResult);
+ms_context->HelperSearchTemplate(templ, myStruct, searchResult);
 
 if(!searchResult.IsEmpty())
   for (size_t i = 0; i < searchResult.Size(); i++)
