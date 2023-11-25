@@ -1,8 +1,8 @@
 ---
 
-# ~~Краткий гайд по написанию агента в рамках example lab~~ Гайд будет дополнен и значительно изменён в пятницу-субботу. Это пока что достаточно сырой вариантик. Ждите субботы короче
+# Краткий гайд по написанию агента в рамках example lab
 
-
+~~Кто прочитал, тот сдохнет завтра, ставь звёздочку на репозиторий, и умрёшь сегодня~~
 
 ---
 
@@ -31,52 +31,37 @@
 
 ---
 
-## <a id="preface">Небольшое предисловие</a>
-
-Cвязанные проблемы желательно читать после прочтения основного содержания гайда
+## <a id="begin">Для начала</a>
 
 ---
 
-### <a id="all_is_graph">Всё есть граф</a>
+### Предполагается, что вы уже понимаете как регистировать агента, но пройдемся по основным пунктам:
 
-Весь интерфейс веб-платформы фактически состоит из узлов графа нашей базы знаний и кода который их обрабатывает. Поэтому часто принципы работы придется описывать в виде графа.
+- В папке со спецификациями копируем папку любого агента, удаляем оттуда все кроме двух Scs файлов, переименовываем всё, в файлах заменяем все названия от других агентов на свои(ищите сами либо смотрите [тут](https://github.com/Mediano4e/bsuir/blob/main/%D0%A2%D1%80%D0%B5%D1%82%D0%B8%D0%B9%20%D1%81%D0%B5%D0%BC/%D0%9F%D0%9F%D0%9E%D0%98%D0%A1/agent/guide_%D0%BF%D0%BE_%D1%80%D0%B5%D0%B3%D0%B8%D1%81%D1%82%D1%80%D0%B0%D1%86%D0%B8%D0%B8_%D0%B2_call_of_dragons.pdf))
 
----
+- В keynodes можно добавлять абсолютно все вершины, которые вы собираетесь использовать во время использования агента, но не собираетесь передавать как аргументы(что-либо типо узла результата, узла класса, которому должен принадлежать объект и тд), тут полная свобода. Все keynodes можно свободно использовать в агенте в любой его точке. Обязательно нужен только узел запроса, тк на нем завязана работа агента.
 
-### <a id="sc-objects">Хранение SC объектов</a>
+- в exapleModule.cpp непосредственно регистрируем агента
 
-Sc-обьектами считаются узлы(вершины) и дуги(ребра) графа. 
-
-Узлы хранят информацию о их системном идентификаторе(в каком-то смысле название переменной), о связях(дугах), в которых они являются родительским узлом(от которого проведена дуга), о связях, в которых они являюся наследником(к которому проведена дуга).
-
-Дуги хранят информацию об их системном идентификаторе(если таковой есть), об узле-родителе данной связи, об узле-наследнике(корректней будет сказать об обьекте-наследнике, т.к. связь может быть проведена и к другой дуге) данной связи и о связях проведённых к текущей.
-
-Доступ к любому Sc-обьекту можно получить с помощью его ScAddr(адреса) он хранит hash-идентификатор данного обьекта и с его помощью находит его в памяти.
-
-[Связанная проблема](#noorient_problem) 
+- создаем в папке с агентом, не поверите, нашего агента(cpp и hpp)
 
 ---
 
-### <a id="same_node">Один и тот же узел</a>
+### Основные моменты
 
-При сборке базы знаний все узлы собираются в один большой граф по системным идентификаторам, поэтому узлы в исходных файлах с одинаковыми системными идентификаторами будут в памяти являться одной и той же вершиной, и все связи проведенные от/к этому узлу будут храниться у одной и той же вершины. Например в первом нашем графе была следующая кострукция: concept_cat <- animal_set; а во втором графе concept_cat <- pets_set; и если мы обратимся к этому узлу, мы получим обе связи. Это просто нужно держать в голове.
+- Любые объекты одного типа с одинаковым системным идентификатором будут являться одним объектом. Например в первом нашем графе была следующая кострукция: concept_cat <- animal_set; а во втором графе concept_cat <- pets_set; и если мы обратимся к этому узлу, мы получим обе связи. Это просто нужно держать в голове. [Это может вызывать некоторые проблемы](#random_neghbours)
 
-[Связанная проблема](#random_neghbours) 
+- Вся логика веба представляется в виде графа и обрабатывается sc-машиной, поэтому все кнопки фактически являются вершинами графа интерфейса, и это будет прослеживаться много где
 
----
+- Вершины и рёбра являются самостоятельными объектами. Взаимодействие с ними осуществляется с помощью типа данных ScAddr. Это можно сказать что-то типо указателей в с++, создавай переменную типа ScAddr мы указываем на объект, но фактически им не владеем(он где-то в sc-памяти). Поэтому взамодействие с ним осуществляется с помощью отдельных средств
 
-## Основные пункты при создании агента:
-
-1. [Получение входных данных агентом](#)
-2. [Реализация алгоритма](#)
-3. [Формирование выходных данных и вывод результата](#)
+- когда создаётся ребро, оно создается от PARENT-объекта к CHILD-объекту, поэтому проверяя, какие есть связи у имеющейся вершины, нужно учитывать, что если рёбра неориентированные, нужно будет выполнять проверки с нашей вершиной на позиции PARENT и на позиции CHILD поотдельности. [Это может вызывать некоторые проблемы](#noorient_problem)
 
 ---
 
-## <a id="input">Получение входных данных агентом</a>
+## <a id="input">Вызов агента из веба, получение аргументов и завершение агениов с выводом результата</a>
 
-Начнем с передачи обекта(ов) в агента. Как я упоминал ранее, весь интерфейс веба является некоторым графом. Когда мы нажимаем пкм по узлу и нажимаем "закрепить"(булавка) мы создаем ребро от узла, который участвует в работе агента, под названием otherAddr к выбранному обьекту. Чтобы после этого вызвать нашего агента, мы нажимаем на кнопку нашего агента, после чего проверяется достаточно ли у otherAddr исходящих рёбер. Если их достаточно, проводится ребро от listenAddr нашего агента к otherAddr. При регистрации мы писали, что наш агент будет реагировать на событие "Появление ребра". Вот это оно самое. После этого запускается наш агент.
-
+Как было написано ранее весь интерфейс фактически является графом. В интерфейсе существует узел otherAddr, который фактически является контейнером для аргументов. Когда мы нажимаем пкм по индификатору объекта в вебе и выбираем булавку(закрепить), от узла otherAddr проводится простое ребро принадлежности(ScType::EdgeAccessConstPosPerm) к данному объекту и у нас снизу веба отобраджается идентификатор обЪекта. После этого при нажатии на кнопку вызова нашего агента, проведётся связь от узла, который входит в графовую структуру агента, под системным идентификатором listenAddr к otherAddr. Таким образом наши аргументы станут частью структуры нашего агента. До проведения этого ребра проверяется количество аргументов, связанных с otherAddr. Если их недостаточно(в спецификациях в файлике ui_menu мы запросили большее количество аргументов), связь проведена не будет. Если аргументов наоборот слишком много, будут взяты первые переданные в нужном количестве. Непосредственно проведение этого ребра и является событием, на которое реагирует наш агент(добавление исходящей дуги)
 
 <p align="center">
 
@@ -84,28 +69,48 @@ Sc-обьектами считаются узлы(вершины) и дуги(р
 
 </p>
 
-Теперь нам нужно получить переданные узлы в самом агенте. Для этого нам надо обратиться непосредственно к otherAddr.
+Теперь нам нужно получить переданные аргументы в самом агенте. Для этого нам надо обратиться непосредственно к otherAddr.
 
 ```c++
-ScAddr actionNode = otherAddr; 
+ScAddr actionNode = otherAddr; //сам по себе otherAddr не может быть использован
 ```
 Если у нас передан один аргумент, то можем его получить через команду(фактически, забегая наперёд, getAnyFromSet использует простейший итератор-тройку):
 ```c++
 ScAddr myInputObject = IteratorUtils::getAnyFromSet(ms_context.get(), actionNode); 
 ```
 
-Если же у нас больше одного аргумента, то используем для этого цикл и вектор аргументов:
+Если же у нас больше одного аргумента, то используем для этого цикл с итератором и вектор аргументов:
 ```c++
-ScAddrVector myInputObjects;
-int i = 0, n = 2;
+ScAddr actionNode = otherAddr;
 
-while (i < n)
-{
-    myInputObjects.insert( myInputObjects.end(), IteratorUtils::getAnyFromSet(ms_context.get(), actionNode) );
-    i++;
-}
+ScAddrVector myInputObjects;
+
+ScIterator3Ptr it3 = m_memoryCtx.Iterator3(actionNode, ScType::EdgeAccessConstPosPerm, ScType::Unknown);
+while( it3->Next() )
+    myInputOdjects.push_back( it3->Get(2) ) //добавляем наш объект неизвестного типа
 ```
-где n -- число ваших аргументов.
+
+---
+
+Теперь разберёмся с завершением работы агента. 
+
+Если нашему агенту не нужно выводить какие-либо результаты(допустим аргумент оказалась нерабочим), то нам нужно завершить его с флагом false и передать ему узел с вводными данными, чтобы он отчистил его:
+
+```c++
+ScAddr actionNode = otherAddr;
+utils::AgentUtils::finishAgentWork(&m_memoryCtx, actionNode, false);
+```
+
+Если наш агентом всё успешно выполнил и мы хотим вывести что-то в качестве ответа, то мы завершаем его с флагом true и передаём ему помимо узла с аргументами вектор всех Sc-объектов, которые мы хотим вывести помимо самих аргументов в качестве результата:
+
+```c++
+ScAddr actionNode = otherAddr;
+ScAddrVector answerElements;
+utils::AgentUtils::finishAgentWork(&m_memoryCtx, actionNode, answerElements, true);
+```
+!!! Важно !!! Выведется только то, что будет тем или иным образом иметь связи(и эти связи будут в векторе ответов) с аргументами либо узлами агента, иначе у агента с ними просто не будет никакой связи и он их просто не сможет подтянуть.
+
+---
 
 ## <a id="algorithm">Реализация алгоритма</a>
 
@@ -120,11 +125,13 @@ SC_LOG_ERROR("something to show in console");
 SC_LOG_ERROR( m_memoryCtx.HelperGetSystemIdtf(yourVertex) );
 ```
 
-Если же у вас Clion, то там уже куда более интересная история... [Смотреть в источнике...](https://youtu.be/dQw4w9WgXcQ?si=hc3lnLTvzrwybdav)
+Если запросить идентификатор у объекта без него, всё ляжет xdd.
+
+Если же у вас Clion, то весь example-app можно открыть как проект и работать непосредственно с ним. Там все намного проще будет, только конфиг настроить придётся.
 
 ---
 
-__Главным инструментом для реализации алгоритма являются Итераторы__
+### __Главным инструментом для реализации алгоритма являются Итераторы и Шаблоны__
 
 ---
 
@@ -136,7 +143,7 @@ __Главным инструментом для реализации алгор
 
 </p>
 
-Итераторы являются универсальным инструментом для перехода от вершины к вершине и для прочих манипуляций с графовыми структурами. Итераторы соответствуют маленьким шаблонам(см Лаб 4 по МОИСу) на 2 вершины и одну связь без узла отношений, либо с ним и соответствущим ему ребром.
+Итераторы являются универсальным инструментом для перехода от вершины к вершине и для прочих манипуляций с графовыми структурами. Итераторы ищут маленькие структуры на 2 вершины и одну связь без узла отношений, либо с ним и соответствущим ему ребром. Для них нужно задавать типы элементов константными типами, чтобы получить обычные объекты.
 
 ---
 
@@ -210,28 +217,240 @@ while (it5->Next())
 
 Все типы объектов можно найти [тут](https://github.com/Mediano4e/bsuir_guides/blob/in_dev/example_app_agent/useful_sources/sc_type.cpp).
 
+<table>
+  <tr>
+    <th>Graphical (SCg)</th>
+    <th>C</th>
+    <th>C++</th>
+  </tr>
+
+  <tr>
+    <td><img src="https://ostis-dev.github.io/sc-machine/images/scg/scg_node.png"></img></td>
+    <td>sc_type_node</td>
+    <td>ScType::Node</td>
+  </tr>
+
+  <tr>
+    <td><img src="https://ostis-dev.github.io/sc-machine/images/scg/scg_node_const.png"></img></td>
+    <td>sc_type_node | sc_type_const</td>
+    <td>ScType::NodeConst</td>
+  </tr>
+
+  <tr>
+    <td><img src="../../images/scg/scg_node_var.png"></img></td>
+    <td>sc_type_node | sc_type_var</td>
+    <td>ScType::NodeVar</td>
+  </tr>
+
+  <tr>
+    <td><img src="https://ostis-dev.github.io/sc-machine/images/scg/scg_node_const_tuple.png"></img></td>
+    <td>sc_type_node | sc_type_const | sc_type_node_tuple</td>
+    <td>ScType::NodeConstTuple</td>
+  </tr>
+
+  <tr>
+    <td><img src="https://ostis-dev.github.io/sc-machine/images/scg/scg_node_var_tuple.png"></img></td>
+    <td>sc_type_node | sc_type_var | sc_type_node_tuple</td>
+    <td>ScType::NodeVarTuple</td>
+  </tr>
+
+  <tr>
+    <td><img src="https://ostis-dev.github.io/sc-machine/images/scg/scg_node_const_struct.png"></img></td>
+    <td>sc_type_node | sc_type_const | sc_type_node_struct</td>
+    <td>ScType::NodeConstStruct</td>
+  </tr>
+
+  <tr>
+    <td><img src="../https://ostis-dev.github.io/sc-machine/images/scg/scg_node_var_struct.png"></img></td>
+    <td>sc_type_node | sc_type_var | sc_type_node_struct</td>
+    <td>ScType::NodeVarStruct</td>
+  </tr>
+
+  <tr>
+    <td><img src="https://ostis-dev.github.io/sc-machine/images/scg/scg_node_const_role.png"></img></td>
+    <td>sc_type_node | sc_type_const | sc_type_node_role</td>
+    <td>ScType::NodeConstRole</td>
+  </tr>
+
+  <tr>
+    <td><img src="https://ostis-dev.github.io/sc-machine/images/scg/scg_node_var_role.png"></img></td>
+    <td>sc_type_node | sc_type_var | sc_type_node_role</td>
+    <td>ScType::NodeVarRole</td>
+  </tr>
+
+  <tr>
+    <td><img src="https://ostis-dev.github.io/sc-machine/images/scg/scg_node_const_norole.png"></img></td>
+    <td>sc_type_node | sc_type_const | sc_type_node_norole</td>
+    <td>ScType::NodeConstNorole</td>
+  </tr>
+
+  <tr>
+    <td><img src="https://ostis-dev.github.io/sc-machine/images/scg/scg_node_var_norole.png"></img></td>
+    <td>sc_type_node | sc_type_var | sc_type_node_norole</td>
+    <td>ScType::NodeVarNorole</td>
+  </tr>
+
+  <tr>
+    <td><img src="https://ostis-dev.github.io/sc-machine/images/scg/scg_node_const_class.png"></img></td>
+    <td>sc_type_node | sc_type_const | sc_type_node_class</td>
+    <td>ScType::NodeConstClass</td>
+  </tr>
+
+  <tr>
+    <td><img src="https://ostis-dev.github.io/sc-machine/images/scg/scg_node_var_class.png"></img></td>
+    <td>sc_type_node | sc_type_var | sc_type_node_class</td>
+    <td>ScType::NodeVarClass</td>
+  </tr>
+
+  <tr>
+    <td><img src="https://ostis-dev.github.io/sc-machine/images/scg/scg_node_const_abstract.png"></img></td>
+    <td>sc_type_node | sc_type_const | sc_type_node_abstract</td>
+    <td>ScType::NodeConstAbstract</td>
+  </tr>
+
+  <tr>
+    <td><img src="https://ostis-dev.github.io/sc-machine/images/scg/scg_node_var_abstract.png"></img></td>
+    <td>sc_type_node | sc_type_var | sc_type_node_abstract</td>
+    <td>ScType::NodeVarAbstract</td>
+  </tr>
+
+  <tr>
+    <td><img src="https://ostis-dev.github.io/sc-machine/images/scg/scg_node_const_material.png"></img></td>
+    <td>sc_type_node | sc_type_const | sc_type_node_material</td>
+    <td>ScType::NodeConstMaterial</td>
+  </tr>
+
+  <tr>
+    <td><img src="https://ostis-dev.github.io/sc-machine/images/scg/scg_node_var_material.png"></img></td>
+    <td>sc_type_node | sc_type_var | sc_type_node_material</td>
+    <td>ScType::NodeVarMaterial</td>
+  </tr>
+
+  <tr>
+    <td><img src="https://ostis-dev.github.io/sc-machine/images/scg/scg_edge_common.png"></img></td>
+    <td>sc_type_edge_common</td>
+    <td>ScType::EdgeUCommon</td>
+  </tr>
+
+  <tr>
+    <td><img src="https://ostis-dev.github.io/sc-machine/images/scg/scg_edge_common_orient.png"></img></td>
+    <td>sc_type_arc_common</td>
+    <td>ScType::EdgeDCommon</td>
+  </tr>
+
+  <tr>
+    <td><img src="https://ostis-dev.github.io/sc-machine/images/scg/scg_edge_const_common.png"></img></td>
+    <td>sc_type_edge_common | sc_type_const</td>
+    <td>ScType::EdgeUCommonConst</td>
+  </tr>
+
+  <tr>
+    <td><img src="https://ostis-dev.github.io/sc-machine/images/scg/scg_edge_var_common.png"></img></td>
+    <td>sc_type_edge_common | sc_type_var</td>
+    <td>ScType::EdgeUCommonVar</td>
+  </tr>
+
+  <tr>
+    <td><img src="https://ostis-dev.github.io/sc-machine/images/scg/scg_edge_const_common_orient.png"></img></td>
+    <td>sc_type_arc_common | sc_type_const</td>
+    <td>ScType::EdgeDCommonConst</td>
+  </tr>
+
+  <tr>
+    <td><img src="https://ostis-dev.github.io/sc-machine/images/scg/scg_edge_var_common_orient.png"></img></td>
+    <td>sc_type_arc_common | sc_type_var</td>
+    <td>ScType::EdgeDCommonVar</td>
+  </tr>
+
+  <tr>
+    <td><img src="https://ostis-dev.github.io/sc-machine/images/scg/scg_edge_access.png"></img></td>
+    <td>sc_type_arc_access</td>
+    <td>ScType::EdgeAccess</td>
+  </tr>
+
+  <tr>
+    <td><img src="https://ostis-dev.github.io/sc-machine/images/scg/scg_edge_const_pos_perm.png"></img></td>
+    <td>sc_type_arc_access | sc_type_const | sc_type_arc_pos | sc_type_arc_perm</td>
+    <td>ScType::EdgeAccessConstPosPerm</td>
+  </tr>
+
+  <tr>
+    <td><img src="https://ostis-dev.github.io/sc-machine/images/scg/scg_edge_var_pos_perm.png"></img></td>
+    <td>sc_type_arc_access | sc_type_var | sc_type_arc_pos | sc_type_arc_perm</td>
+    <td>ScType::EdgeAccessVarPosPerm</td>
+  </tr>
+
+  <tr>
+    <td><img src="https://ostis-dev.github.io/sc-machine/images/scg/scg_edge_const_neg_perm.png"></img></td>
+    <td>sc_type_arc_access | sc_type_const | sc_type_arc_neg | sc_type_arc_perm</td>
+    <td>ScType::EdgeAccessConstNegPerm</td>
+  </tr>
+
+  <tr>
+    <td><img src="https://ostis-dev.github.io/sc-machine/images/scg/scg_edge_var_neg_perm.png"></img></td>
+    <td>sc_type_arc_access | sc_type_var | sc_type_arc_neg | sc_type_arc_perm</td>
+    <td>ScType::EdgeAccessVarNegPerm</td>
+  </tr>
+
+  <tr>
+    <td><img src="https://ostis-dev.github.io/sc-machine/images/scg/scg_edge_const_fuz_perm.png"></img></td>
+    <td>sc_type_arc_access | sc_type_const | sc_type_arc_fuz | sc_type_arc_perm</td>
+    <td>ScType::EdgeAccessConstFuzPerm</td>
+  </tr>
+
+  <tr>
+    <td><img src="https://ostis-dev.github.io/sc-machine/images/scg/scg_edge_var_fuz_perm.png"></img></td>
+    <td>sc_type_arc_access | sc_type_var | sc_type_arc_fuz | sc_type_arc_perm</td>
+    <td>ScType::EdgeAccessVarFuzPerm</td>
+  </tr>
+
+  <tr>
+    <td><img src="https://ostis-dev.github.io/sc-machine/images/scg/scg_edge_const_pos_temp.png"></img></td>
+    <td>sc_type_arc_access | sc_type_const | sc_type_arc_pos | sc_type_arc_temp</td>
+    <td>ScType::EdgeAccessConstPosTemp</td>
+  </tr>
+
+  <tr>
+    <td><img src="https://ostis-dev.github.io/sc-machine/images/scg/scg_edge_var_pos_temp.png"></img></td>
+    <td>sc_type_arc_access | sc_type_var | sc_type_arc_pos | sc_type_arc_temp</td>
+    <td>ScType::EdgeAccessVarPosPerm</td>
+  </tr>
+
+  <tr>
+    <td><img src="https://ostis-dev.github.io/sc-machine/images/scg/scg_edge_const_neg_temp.png"></img></td>
+    <td>sc_type_arc_access | sc_type_const | sc_type_arc_neg | sc_type_arc_temp</td>
+    <td>ScType::EdgeAccessConstNegTemp</td>
+  </tr>
+
+  <tr>
+    <td><img src="https://ostis-dev.github.io/sc-machine/images/scg/scg_edge_var_neg_temp.png"></img></td>
+    <td>sc_type_arc_access | sc_type_var | sc_type_arc_neg | sc_type_arc_temp</td>
+    <td>ScType::EdgeAccessVarNegPerm</td>
+  </tr>
+
+  <tr>
+    <td><img src="https://ostis-dev.github.io/sc-machine/images/scg/scg_edge_const_fuz_temp.png"></img></td>
+    <td>sc_type_arc_access | sc_type_const | sc_type_arc_fuz | sc_type_arc_temp</td>
+    <td>ScType::EdgeAccessConstFuzTemp</td>
+  </tr>
+
+  <tr>
+    <td><img src="https://ostis-dev.github.io/sc-machine/images/scg/scg_edge_var_fuz_temp.png"></img></td>
+    <td>sc_type_arc_access | sc_type_var | sc_type_arc_fuz | sc_type_arc_temp</td>
+    <td>ScType::EdgeAccessVarFuzPerm</td>
+  </tr>
+
+</table>
+
 ---
 
-## <a id="output">Формирование выходных данных и вывод результата</a>
-
-Если наш агент столкнулся с ошибкой или по какой-либо причине не смог правильно отработать, то нам нужно завершить его с флагом false и передать ему узел с вводными данными, чтобы он отчистил его:
-
-```c++
-ScAddr actionNode = otherAddr;
-utils::AgentUtils::finishAgentWork(&m_memoryCtx, actionNode, false);
-```
-
-Если наш агентом всё успешно выполнил, то мы завершаем его с флагом true и передаём ему помимо узла с аргументами вектор всех Sc-объектов, которые мы хотим вывести помимо самих аргументов в качестве результата:
-
-```c++
-ScAddr actionNode = otherAddr;
-ScAddrVector answerElements;
-utils::AgentUtils::finishAgentWork(&m_memoryCtx, actionNode, answerElements, true);
-```
+#### <a id="pattern">__Шаблоны__</a>
 
 ---
 
-Чтобы создать непосредственно объекты, которые попадут в вектор выходных можно использовать:
+## Создание обЪектов
+
+Чтобы создать непосредственно объекты, которые попадут в вектор выходных, либо просто для дальнейшего использования можно использовать:
 
 ```c++
 ScAddrVector answerElements;
