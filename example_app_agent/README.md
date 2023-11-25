@@ -236,12 +236,12 @@ templ.Triple(
 ScTemplate templ;
 templ.Triple(
   device_addr,    // sc-addr of device node
-  ScType::EDGE_ACCESS_VAR_POS_PERM,
-  ScType::NODE_VAR >> "_device_instance"
+  ScType::EdgeAccessVarPosPerm,
+  ScType::NodeVar >> "_device_instance"
 );
 templ.Triple(
   device_enabled_addr,    // sc-addr of device_enabled node
-  ScType::EDGE_ACCESS_VAR_POS_PERM,
+  ScType::EdgeAccessVarPosPerm,
   "_device_instance"
 );
 ```
@@ -250,7 +250,56 @@ templ.Triple(
 
 Также можно увеличивать шаблон конструкциями вида итераторов5:
 
+```c++
+ScTemplate templ;
+templ.TripleWithRelation(
+  param1,
+  ScType::EdgeDCommonVar,
+  param2,
+  ScType::EdgeAccessVarPosPerm,
+  some_nrel
+);
+```
 
+Теперь перейдём к получению результата поиска  
+Результат поиска шаблоном является отдельным типом данных ```ScTemplateSearchResult searchResult;```  
+Выполнив поиск мы сохряняем ответ в созданную заранее структуру результатов ```ms_context->HelperSearchTemplate(templ, searchResult);```  
+После этого нам нужно проверить не вернулась ли нам пустая структура, тк в таком случае при обращении всё умрёт ```if(!searchResult.IsEmpty())```
+И теперь мы можем перебрать нашу структуру как массив. Если мы хотим получить адрес какого-то объекта в каждом ответе, то нужно будет его назвать в самом шаблоне. Тогда при переборе результатов мы сможем к нему обратится.
+Пример:
+
+```c++
+ScAddrVector resultNodes;
+
+ScTemplate templ;
+
+templ.TripleWithRelation(
+  myNode,
+  ScType::EdgeDCommonVar,
+  ScType::NodeVar >> "_result_node",
+  ScType::EdgeAccessVarPosPerm,
+  some_nrel
+);
+templ.Triple(
+  hello_kitty_set,
+  ScType::EdgeAccessVarPosPerm,
+  "_result_node"
+);
+
+
+ScTemplateSearchResult searchResult;
+
+ms_context->HelperSearchTemplate(templ, searchResult);
+
+if(!searchResult.IsEmpty())
+  for (size_t i = 0; i < searchResult.Size(); i++)
+    resultNodes.push_back( searchResult[i]["_result_node"] );
+``` 
+
+Так же можно искать только те шаблоны, которые пренадлежат определённой структуре:
+``` 
+ms_context.HelperSearchTemplateInStruct(templ, myStructNode, searchResult);
+``` 
 
 ---
 
@@ -557,26 +606,24 @@ while (it3_2->Next())
 
 Учитывая, что у нас все узлы с одинаковыми системными идентификаторами объединяются в один узел, у наших узлов могут возникнуть куча непонятных связей, которые нам нужно как-то обрабатывать.
 
-Поэтому, если вы в качестве аргумента передаете системный идентификатор контура, то можно прибегнуть к следующим шагам:
-
-1. Сохранить адреса всех вершин нашего графа с помощью итератора3 в вектор, и перейдя на другой узел проверять, пренадлежит ли он нашему вектору;
-2. При обходе графа использовать итераторы5(пусть inputStruct - название нашего контура):
+Можно выполнять поиск с помощью шаблонов в определенной структуре. Это будет работать, тк мы передаём наш граф по идентификатору контура, являющегося в свою очередь структурой, которой пренадлежит всё, что внутри.
 
 ```c++
-ScAddr actionNode = otherAddr;
-ScAddr inputStruct = IteratorUtils::getAnyFromSet(ms_context.get(), actionNode); 
+ScTemplate templ;
+templ.Triple(
+  param1,
+  ScType::EdgeAccessVarPosPerm,
+  ScType::NodeVar
+);
 
-ScIterator5Ptr it5 = m_memoryCtx.Iterator5(
-        myCurrentNode,                        
-        ScType::Unknown,                    
-        ScType::NodeConst,                  
-        ScType::EdgeAccessConstPosPerm,     
-        inputStruct);                 
+ScTemplateSearchResult searchResult;
 
-while (it5->Next())
-{
-   ...
-}
+ms_context->HelperSearchTemplate(templ, muStruct, searchResult);
+
+if(!searchResult.IsEmpty())
+  for (size_t i = 0; i < searchResult.Size(); i++)
+    ...
+
 ```
 [К предисловию](#same_node)
 
