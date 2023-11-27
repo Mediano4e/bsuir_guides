@@ -12,6 +12,7 @@
 
 ---
 
+
 ## Содержание
 - [Источники и документация](#sources)
 - [Для начала](#begin)
@@ -71,7 +72,7 @@
 
 <p align="center">
 
-  <img width="186" height="302" src="https://github.com/Mediano4e/bsuir_guides/assets/115105818/129660f6-3767-4fe5-899f-c976b1100541">
+  <img width="186" height="302" src="https://github.com/Mediano4e/bsuir_guides/assets/115105818/917f88c8-31a4-48ba-9c4e-deddf7330d20">
 
 </p>
 
