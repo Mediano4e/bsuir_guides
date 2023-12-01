@@ -4,14 +4,14 @@
 
 В данном случае у нас только один аргумент попадает на вход, поэтому вектор аргументов не потребуется. Обращаемся к otherAddr и достаем наш аргумент:
 
-```с++
+```c++
 ScAddr actionNode = otherAddr;
 ScAddr inputGraph = IteratorUtils::getAnyFromSet(ms_context.get(), actionNode);
 ```
 
 Сразу же добавим проверку нашего аргумента и завершение работы агента, если наш аргумент не подходит:
 
-```с++
+```c++
 if (!inputGraph.IsValid()) {
     SC_LOG_ERROR("CycleCheckAgent:  Invalid argument");
     utils::AgentUtils::finishAgentWork(&m_memoryCtx, actionNode, false);
@@ -23,13 +23,13 @@ if (!inputGraph.IsValid()) {
 
 Создадим вектор наших ответов, в который позже будем добавлять объекты для ответа:
 
-```с++
+```c++
 ScAddrVector answerElements;
 ```
 
 Для формирования ответа агента создадим отдельную функцию, в которой уже вызовем непосредственно проверку графа. Добавим в заголовочный файл:
 
-```с++
+```c++
 void formResultConstruction(ScAddrVector & answerElements, ScAddr const & inputGraph);
 ```
 
@@ -37,13 +37,13 @@ void formResultConstruction(ScAddrVector & answerElements, ScAddr const & inputG
 
 Из переменных тут только дуга. Объявим её:
 
-```с++
+```c++
 ScAddr checkoutResult;
 ```
 
 Создадим if для создания необходимой дуги, где flag это результат нашей проверки(true - в графе нет циклов, false - есть как минимум один цикл):
 
-```с++
+```c++
 if ( flag )
         checkoutResult = m_memoryCtx.CreateEdge(ScType::EdgeAccessConstNegPerm, Keynodes::cycle_graph_set, inputGraph);
     else
@@ -53,7 +53,7 @@ if ( flag )
 
 Добавим элементы ответа в вектор ответов:
 
-```с++
+```c++
 answerElements.push_back(Keynodes::cycle_graph_set);
 answerElements.push_back(checkoutResult);
 ```
@@ -62,7 +62,7 @@ answerElements.push_back(checkoutResult);
 
 Сама итоговая функция:
 
-```с++
+```c++
 void CycleCheckAgent::clearPreviousResults(ScAddr const & inputGraph) {
     ScIterator3Ptr it3 = m_memoryCtx.Iterator3(
             Keynodes::cycle_graph_set,
@@ -78,7 +78,7 @@ void CycleCheckAgent::clearPreviousResults(ScAddr const & inputGraph) {
 
 Добавим вызов функции очистки в нашу функцию формирования результата:
 
-```с++
+```c++
 void CycleCheckAgent::formResultConstruction(ScAddrVector & answerElements, const ScAddr & inputGraph) {
     clearPreviousResults(inputGraph);
 
